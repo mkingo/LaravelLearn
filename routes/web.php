@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 use function PHPUnit\Framework\fileExists;
 use App\Models\Post;
@@ -18,36 +19,22 @@ use Spatie\YamlFrontMatter\YamlFrontMatter;
 */
 
 Route::get('/', function () {
-    $files = File::files(resource_path("posts"));
-    $posts = [];
-
-    foreach ($files as $file) {
-        $document = YamlFrontMatter::parseFile($file);
-
-
-        $posts[] = new Post(
-            $document->title,
-            $document->excerpt,
-            $document->date,
-            $document->body()
-
-        );
-        }
-        ddd($posts);
-        
-
     
+    
+
+    $posts = Post::with('category')->get();
+
     // $posts = Post::all();
 
    
-    // return view('posts', [
-    //     'posts' => $posts
-    // ]);
+    return view('posts', [
+        'posts' => $posts
+    ]);
 });
 
-Route::get('posts/{post}', function ($slug) {
+Route::get('posts/{post:slug}', function (Post $post) {
 
-    $post = Post::find($slug);
+    
     // $post = file_get_contents($path);
 
 
@@ -55,6 +42,12 @@ Route::get('posts/{post}', function ($slug) {
         'post',
         [
             'post' => $post
-        ]
-    );
-})->where('post', '[A-z_\-]+');
+        
+        ]);
+});
+
+Route::get('categories/{category:slug}',function (Category $category){
+    return view('posts',[
+        'posts'=> $category->posts
+    ]);
+});

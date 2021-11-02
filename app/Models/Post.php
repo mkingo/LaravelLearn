@@ -1,44 +1,24 @@
 <?php
+
 namespace App\Models;
 
+use App\Models\Category;
+use Illuminate\Database\Eloquent\Concerns\HasRelationships;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\File;
-
-class Post{
-
-    public $title;
-
-
-    public $excerpt;
-
-    public $date;
-
-
-    public $body;
-
-    public function __construct($title,$excerpt,$date,$body)
+class Post extends Model
+{
+    use HasFactory;
+    protected $guarded = [];
+    public function category()
     {
-        $this->title = $title;
-        $this->excerpt = $excerpt; 
-        $this->date = $date; 
-        $this->body = $body;
-            
+        return $this->belongsTo(Category::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
-
-    public static function find($slug){
-        $path = resource_path("posts/{$slug}.html");
-
-        if(!file_exists($path)){
-         throw new ModelNotFoundException();
-        }
-        return cache()->remember("posts.{$slug}",1200,fn()=>file_get_contents($path));
-    }
-    public static function all(){
-        $files = File::files(resource_path("posts/"));
-        return array_map(function ($file){
-            return $file->getContents();
-        },$files);
-    }
+    
 }
